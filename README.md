@@ -1,73 +1,214 @@
-# Read this before project execution
+# Appium Cross-Platform (Android, iOS) example
 
+Don't forget to give this project a ⭐
 
-### About the apps
-The Fastip app can be downloaded by this repository
-[https://github.com/ptraeg/mobile-apps-4-ways](https://github.com/ptraeg/mobile-apps-4-ways)
+## Preconditions
 
-I have built the apps for Android and iOS platform, and these are located in app folder.
+* Java 23 (you might downgrade it without any problem)
+* Install [Appium](https://appium.io/docs/en/latest/quickstart/install/)
+* Install the [UiAutomator2 Driver](https://appium.io/docs/en/latest/quickstart/uiauto2-driver/)
+    * Make sure you update it by running
+      ```shell
+      appium driver update uiautomator2
+      ```
+* Install the [XCUITest Driver](https://appium.github.io/appium-xcuitest-driver/latest/installation/)
+    * Make sure you update it by running
+        ```shell
+        appium driver update xcuitest
+        ```
 
+## About the apps
 
-### Android
+The app used in this project is from the WebDriverIO native demo app: https://github.com/webdriverio/native-demo-app
 
-#### Configurations
-To execute the examples over the Android platform you'll need:
-* Android SDK
-* Updated _Build Tools_, _Platform Tools_ and, at least, one _System Image (Android Version)_
-* Configure Android Path on your environment variables
-   * ANDROID_HOME: root android sdk directory
-   * PATH: ANDROID_HOME + the following paths = _platform-tools_, _tools_, _tools/bin_ 
-* And Android Virtual Device
-   * AVD or Genymotion
-   
+## How to run
 
-#### Inspect elements on Android
-You can use the [uiautomatorviewer](https://developer.android.com/training/testing/ui-testing/uiautomator-testing.html) to inspect elements on Android devices.
- or you can use [Appium Desktop](https://github.com/appium/appium-desktop)
+### Precondition
 
-### iOS
+As a precondition you must run Appium in your local machine
 
-#### Configurations
-To execute the examples over the iOS platform you'l need:
-* MacOS machine :-)
-* Xcode installed
-* iPhone simulator (I recommend, for these tests iOS version > 10)
-* Follow all the steps on [https://github.com/appium/appium-xcuitest-driver](https://github.com/appium/appium-xcuitest-driver)
+```shell
+appium
+```
 
+### Properties file
 
-#### Inspect elementos on iOS
-You also can use [Appium Desktop](https://github.com/appium/appium-desktop)
-or you can use the [Macaca App Inspector](https://macacajs.github.io/app-inspector/)
+In the `config.properties` you will manage important data as:
 
-#### Execution
-On a MacOs machine give write access to _node_modules_:
-`sudo chmod -R 777 /usr/local/lib/node_modules`
+* `platform`: indicates the platform the tests will run
+* `appium.ip`: the IP address Appium is expected to run
+* `appium.port`: the port address Appium is expected to run
+* `device.ios.name`: the iPhone Simulator expected to run where you must have it created
+* `device.android.name`: the Android Emulator expected to run where you must have it created
+* `platform.ios.version`: the iOS version expected to run in the iPhone Simulator where you must have it created
+* `platform.android.version`: the Android version expected to run in the Android Emulator where you must have it created
+* `app.ios.path`: the path to the Android app (`.apk` file)
+* `app.android.path`: the path to the iOS app (`.zip` or `.ipa` file)
 
-### Appium
-Try to always have Appium and libraries updated.
-* Verify the core Appium version on [npm appium site](https://www.npmjs.com/package/appium). To see your Appium version run `appium --version` on Terminal
-* Verify the Appium library version on [https://github.com/appium/java-client](https://github.com/appium/java-client)
-   * If it differ from _pom.xml_ file, update it!
+**NOTE**
 
-### Project execution
-First you'll need to install Appium via npm and start the server at Terminal running the following command: `appium --session-override`
+*The apps are located in the app folder and there is a concatenation in the `DriverFactory` to get its full path using
+`System.getProperty("user.dir")`
 
-And before the execution set the proper values to _config.properties_ file. This file will get all information about platform, platform versions, app, and other information.
+### Running it
 
-What you need to do on this file:
-* alter _run.platform_ to set the platform execution (ios or android)
-* set the proper device name for ios and android
-   * in my example I'm using simulators
-* set the proper platform version (mainly for ios)
-   
-   
-### About the tests
-On the package _com.eliasnogueira.basic_ you'll find two tests: one for Android and another for iOS, both using Page Objects.
-   
-On the package _com.eliasnogueira.unique_script_ you'l find the _unique script_ that's use the information on _config.properties_ to execute the tests in Android or iOS
+Change the `config.properties` file within the correct data you want to run based on the platform.
 
-### Any question, error or feedback?
-Please fill an issue ;-)
+#### Example 1: Android
 
+if you want to run the tests in the Android platform using _Android 13 (Tiramisu)_ in a existing emulator called
+_TiramisuTest_, you might end up with the following information in the `config.properties` file
 
+```properties
+# all others not changed properties removed
+platform=android
+device.android.name=TiramisuTest
+platform.android.version=13
+```
 
+#### Example 2: iOS
+
+if you want to run the tests in the iOS platform using _iOS 18.2_ in an existing emulator called
+_iPhone Simulator_, you might end up with the following information in the `config.properties` file
+
+```properties
+# all others not changed properties removed
+platform=ios
+device.android.name=iPhone Simulator
+platform.android.version=18.2
+```
+
+## Code Explanation
+
+### Configuration
+
+The configuration, mostly based on the platform, is done by a property file located in the
+`src/test/resources/config.properties`.
+
+The code uses the value from each property through two classes. The `ConfigurationManager` is responsible to load the
+configuration imitating a Singleton pattern using the `ConfigCache.getOrCreate()` method from
+the [Owner library](https://matteobaccan.github.io/owner/).
+
+The `Configuration` class is the one responsible to match each property in the `config.properties` file, enabling a
+fluent way to get its data by associating the property name withing an attribute in the class by using the `@Key`
+annotation
+
+```java
+// this will return the value from the device.android.name property
+class ConfigExample {
+
+    interface Configuration {
+        @Key("device.android.name")
+        String androidDeviceName();
+    }
+
+    class Usage {
+        void main() {
+            ConfigurationManager.configuration().androidDeviceName();
+        }
+    }
+}
+```
+
+Please, note that the above code is an example that won't work by copy-past. It's just an education example. You must
+rely on in the already created code.
+
+### Driver Management
+
+The basic driver information is done by the `DriverFactory` enumeration by setting all the necessary configurations to
+run the tests using either Android or iOS.
+
+Note that you can use any approach: `if-else`, `switch-case` or any that might work... This is a more elegant way to
+implement the Factory pattern to execute the tests in the target platform.
+
+You noticed that each enum will return an instance of the `AppiumDriver` for the specific platform. To use it in your
+test you must use the `valueOf()` method from the enumeration and call the method associated with its creation which is
+`createDriver()`
+
+```java
+class DriverExample {
+    // gets the platform property value, set's it to upper case to match with the existing enums and call the createDriver()
+    AppiumDriver driver = DriverFactory.valueOf(configuration().platform().toUpperCase()).createDriver();
+}
+```
+
+### Page Objects
+
+The `screens` package contains the Page Objects where two important things happens there.
+
+First, the different annotation to locate the elements for Android or iOS which are `@AndroidFindBy` and
+`iOSXCUITFindBy`, respectively. This will ensure you can use the same methods in the page object without duplications
+where the only possible subject of change is the locator, where we annotate to have the correct one based on the target
+platform.
+
+```java
+class PageObjectExample {
+    @AndroidFindBy(id = "android:id/button1")
+    @iOSXCUITFindBy(accessibility = "OK")
+    WebElement alertButton;
+}
+```
+
+Second, the constructor which will initialize the elements (based on the target platform). This is necessary to make
+sure the element is instantiated using the correct locator value per platform. The code is simple
+
+```java
+class PageObjectExample {
+    public PageObjectExample(AppiumDriver driver) {
+        PageFactory.initElements(new AppiumFieldDecorator(driver), this);
+    }
+}
+```
+
+### The test
+
+The project shows two different examples: one per platform and one cross-platform
+
+#### Per platform
+
+Located in the `basic` package at the `src/test/java` it shows one test per platform by not using the `DriverFactory`.
+
+Note that both the `AndroidTest` and `IOSTest` does the same thing, but the different (apart from the ugly code), is in
+the locators. In a cross-platform test you would end up with a lot of code duplication, even test duplications.
+
+#### Cross-Platform
+
+To solve the above-mentioned problem we can make the usage of the Page Object approach using the specific locator
+annotations to have a simple source of truth when interacting with the app. Note that this wouldn't be possible without
+using Page Objects.
+
+The combination of the `DriverFactory` with the created Page Objects will end up with a reliable ans elegant code that
+will run in both platforms.
+
+```java
+class CombinedTest {
+
+    private static AppiumDriver driver;
+
+    @BeforeAll
+    static void setUp() throws Exception {
+        driver = DriverFactory.valueOf(configuration().platform().toUpperCase()).createDriver();
+    }
+
+    @AfterAll
+    static void tearDown() {
+        driver.quit();
+    }
+
+    @Test
+    void testCalculateDefaultTip() {
+        MainScreen mainScreen = new MainScreen(driver);
+        mainScreen.tagOnLogin();
+
+        LoginScreen loginScreen = new LoginScreen(driver);
+        loginScreen.login("elias@elias.com", "12w3e4r5t");
+
+        assertEquals("You are logged in!", loginScreen.retrieveAlertMessage());
+
+        loginScreen.tapOnOK();
+    }
+}
+```
+
+The value of the `platform` property will determine the platform where the test will be executed. In case of Android,
+the page objects will use the locators set by the `@AndroidFindBy`, where in iOS it will use the `@iOSXCUITFindBy`.
