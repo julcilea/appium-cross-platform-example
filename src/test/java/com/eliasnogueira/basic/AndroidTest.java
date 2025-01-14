@@ -63,7 +63,7 @@ class AndroidTest {
     }
 
     @Test
-    void login() {
+    void successfulLogin() {
         // access login
         driver.findElement(AppiumBy.ByAccessibilityId.accessibilityId("Login")).click();
 

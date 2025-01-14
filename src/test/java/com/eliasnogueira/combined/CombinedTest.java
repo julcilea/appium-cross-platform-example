@@ -49,7 +49,7 @@ class CombinedTest {
     }
 
     @Test
-    void testCalculateDefaultTip() {
+    void successfulLogin() {
         MainScreen mainScreen = new MainScreen(driver);
         mainScreen.tagOnLogin();
 
