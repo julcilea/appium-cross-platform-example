@@ -1,6 +1,13 @@
-# Appium Cross-Platform (Android, iOS) example
+# Appium Cross-Platform (Android, iOS) Example
 
 Don't forget to give this project a ⭐
+
+This project delivers a basic, but concise, example of a cross-platform test creation and execution using Appium and
+Java by applying simple design patterns and best Appium features.
+
+## Example
+
+![Test execution](assets/test-execution.gif)
 
 ## Preconditions
 
