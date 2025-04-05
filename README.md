@@ -219,3 +219,5 @@ class CombinedTest {
 
 The value of the `platform` property will determine the platform where the test will be executed. In case of Android,
 the page objects will use the locators set by the `@AndroidFindBy`, where in iOS it will use the `@iOSXCUITFindBy`.
+
+test git.
